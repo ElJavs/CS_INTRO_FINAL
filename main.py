@@ -37,41 +37,61 @@ def inputType(prompt, inputType, is_list = False):
     return responseList
 
 
-def getUserInput():
+def getUserInput(person):
     # function should ask user where they went - not sure about granularity yet; example specifies particular buildings
     lastVisited = []
-    responses = inputType("Where do you remember visiting the last week? Enter one individual place and then press enter/return", str, True)
-    print(responses)
-    dayExposed = inputType("What day did you become exposed?", int, False)
+    while True:
+        response = input("Where do you remember visiting the last week? ")
+        if response == "that's it":
+            break
+        lastVisited.append(response)
 
-    othersExposed = inputType("Who do you remember was with you?", str, True)
+        print(lastVisited)
 
     
-    pass
+    dayExposed = input("What day did you become exposed? ")
+    # unless we do some fancy NLP stuffS, the format will most likely be like: 7-9; 1-3; etc.
+    
+    othersExposedCount = 0
+    othersExposed = []
+    while True:
+        response = input("Who do you remember was with you? ")
+        othersExposedCount += 1
+        if response == "that's it":
+            break
+        othersExposed.append(response)
 
-def inputData():
-    pass
+    if len(othersExposed) > 0:
+        getSecondaryContact(othersExposed)
+    personList = [person,dayExposed,lastVisited, othersExposed]
+    
+    database.append(personList)
 
-'''Boilerplate code while we figure out how to write things.'''
-def writeFile(fileName):
-    with open(fileName, 'n') as file:
-        fieldNames = []
-        writer = csv.DictWriter(file, fieldnames=fieldNames)
-        writer.writeheader()
+def getSecondaryContact(othersExposed):
+    #Function for calling all of the secondary contacts
+    for person in othersExposed:
+        print("The following questions are for", person, ":")
+        getUserInput(person)
+        
+def writer():
+    #Writes into the Json File
+    header = ["NAME","DAY EXPOSED", "LOCATION", "PEOPLE CONTACTED"]
+    file = open('tracing.json', 'w')
 
-
-
-def readFile(fileName):
-    with open(fileName, 'r') as file:
-        reader = csv.DictReader(file)
-
-        # do processing here
-    pass
-
-def getPotentialExposure():
-    pass
+    for x in database:
+        dictionary ={
+        "NAME" : x[0],
+        "DAY EXPOSED" : x[1],
+        "LOCATIONS" : x[2],
+        "PEOPLE CONTACTED" :x[3]}
+        json_object = json.dumps(dictionary, indent = 4)
+        file.write(json_object)
+    file.close()
+                
+        
     
 
-# testing app
-if __name__ == "__main__":
-    getUserInput()
+person = input("What is your name? ")
+
+getUserInput(person)
+writer()
